@@ -1,0 +1,33 @@
+version: "2"
+
+volumes:
+   postgres:
+      driver: "ubiquity"
+      driver_opts:
+        size: "2"
+        profile: "gold"
+
+services:
+   web:
+     image: shaybery/docker_and_ibm_storage
+     ports:
+        -  "80:80"
+     environment:
+        - "USE_POSTGRES_HOST=postgres"
+        - "POSTGRES_USER=flocker"
+        - "POSTGRES_PASSWORD=flockerdemo"
+     network_mode: "bridge"
+     links:
+        - "postgres:postgres"
+   postgres:
+     image: postgres:9.5
+     ports:
+        -  "5432:5432"
+     environment:
+        - "POSTGRES_USER=flocker"
+        - "POSTGRES_PASSWORD=flockerdemo"
+        - "POSTGRES_DB=postgres"
+        - "PGDATA=/var/lib/postgresql/data/data"
+     network_mode: "bridge"
+     volumes:
+        - 'postgres:/var/lib/postgresql/data'
