@@ -1,0 +1,69 @@
+
+cleanmp ()
+{
+# clean up specific multipath device
+echo "going to clean mp device $1"
+dmsetup message $1 0 "fail_if_no_path"
+multipath -f $1
+}
+function cleanmpall()
+{
+# clean all multipath devices
+	for i in `multipath -ll | awk '/dm/{print $1}'`; do cleanmp $i; done
+}
+
+function u-kill()
+{
+# kill ubiquity process
+	ps -ef| grep ubiquity | grep -v grep |grep -v tail | awk '{print $2}' | xargs kill -9
+}
+function dv_rmall()
+{
+# stop and rm all containers and delete all docker volumes
+	docker stop `docker ps -aq`; sleep 1
+	docker rm `docker ps -aq`; sleep 1
+	docker volume ls |sed '1d' | awk '{print $2}' | xargs docker volume rm
+}
+
+function d-images-vols()
+{
+# list all images volumes config
+	for i in `d images |awk '{print $1":"$2}'| grep -v "^REP"`; do echo "================= $i ============"; docker inspect $i  -f '{{.ContainerConfig.Volumes }}'; done
+}
+
+function dvll()
+{
+# list all docker volume info with great detail
+printf "%-20s  %-10s  %-35s  %-15s  %-10s  %-10s  %-10s\n" volume profile wwn array device ismounted container
+for i in `docker volume ls -q`; do
+docker volume inspect $i > /tmp/insp
+wwn=`cat /tmp/insp | grep Wwn| awk -F\" '{print $4}'`;
+profile=`cat /tmp/insp | grep Profile| awk -F\" '{print $4}'`
+array=`cat /tmp/insp | grep StorageName| awk -F\" '{print $4}'`
+mp=`multipath -ll | grep  -i $wwn | awk '{print $1}' `
+mounted=`df | grep -w "$mp" >/dev/null && echo mounted || echo ""`
+[ -z "$mp" ] && mounted=""
+for c in `docker ps -qa`; do 
+  docker inspect $c -f '{{.Mounts}}' | grep -w $i > /dev/null && { con=$c; break; } || con=""
+done
+printf "%-20s  %-10s  %-35s  %-15s  %-10s  %-10s  %-10s\n" "$i" "$profile"  "$wwn"   "$array" "$mp" "$mounted" "$con"
+rm -f /tmp/insp
+done
+
+}
+
+
+PATH=${PATH}:/var/tmp:/var/tmp/vol
+U_BIN_DIR="/var/tmp"
+U_LOG_DIR="/tmp"
+
+alias tt='tail -f ${U_LOG_DIR}/ubiquity*.log'
+alias u-ps='ps -ef| grep ubiquity | grep -v tail'
+alias dvckill='docker rm `docker ps -qa`'
+alias dvl='docker volume ls'
+alias dv='docker volume'
+alias dvp='docker ps -a'
+alias d='docker'
+alias u-run='cd ${U_BIN_DIR}; ${U_BIN_DIR}/ubiquity-docker-plugin &'
+alias u-runser='cd ${U_BIN_DIR}; ${U_BIN_DIR}/ubiquity &'
+
