@@ -1,0 +1,90 @@
+version: "3"
+
+volumes:
+   redis:
+      driver: "ubiquity"
+      driver_opts:
+        size: "1"
+        profile: "gold"
+   jenkins:
+      driver: "ubiquity"
+      driver_opts:
+        size: "1"
+        profile: "gold"
+   mysql:
+      driver: "ubiquity"
+      driver_opts:
+        size: "1"
+        profile: "gold"
+   mongoConf:
+      driver: "ubiquity"
+      driver_opts:
+        size: "1"
+        profile: "gold"
+   mongoDB:
+      driver: "ubiquity"
+      driver_opts:
+        size: "1"
+        profile: "gold"
+   elasticsearch:
+      driver: "ubiquity"
+      driver_opts:
+        size: "1"
+        profile: "gold"
+   postgres:
+      driver: "ubiquity"
+      driver_opts:
+        size: "1"
+        profile: "gold"
+
+services:
+   web:
+     image: shaybery/docker_and_ibm_storage
+     ports:
+        -  "80:80"
+     environment:
+        - "USE_POSTGRES_HOST=postgres"
+        - "POSTGRES_USER=ubiquity"
+        - "POSTGRES_PASSWORD=ubiquitydemo"
+     network_mode: "bridge"
+     links:
+        - "postgres:postgres"
+   postgres:
+     image: postgres:9.5
+     ports:
+        -  "5432:5432"
+     environment:
+        - "POSTGRES_USER=ubiquity"
+        - "POSTGRES_PASSWORD=ubiquitydemo"
+        - "POSTGRES_DB=postgres"
+        - "PGDATA=/var/lib/postgresql/data/data"
+     network_mode: "bridge"
+     volumes:
+        - 'postgres:/var/lib/postgresql/data'
+        # su - postgres -c "psql -c 'create table mytable (num int); \dt'"
+   elasticsearch:
+     image: elasticsearch
+     volumes:
+        - 'elasticsearch:/usr/share/elasticsearch/data'
+       # check by curl 'http://localhost:9200/?pretty'
+   mongo:
+     image: mongo
+     volumes:
+        - 'mongoConf:/data/configdb'
+        - 'mongoDB:/data/db'
+       # see waiting for connections on port 27017
+   redis:
+     image: redis
+     volumes:
+        - 'redis:/data'
+
+   jenkins:
+     image: jenkins
+     volumes:
+        - 'jenkins:/var/jenkins_home'
+
+   mysql:
+     image: mysql
+     volumes:
+        - 'mysql:/data'
+

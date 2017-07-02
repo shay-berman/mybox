@@ -1,0 +1,76 @@
+version: "3"
+
+volumes:
+   a1:
+      driver: "ubiquity"
+      driver_opts:
+        size: "1"
+        profile: "gold"
+   a2:
+      driver: "ubiquity"
+      driver_opts:
+        size: "1"
+        profile: "gold"
+   a3:
+      driver: "ubiquity"
+      driver_opts:
+        size: "1"
+        profile: "gold"
+   a4:
+      driver: "ubiquity"
+      driver_opts:
+        size: "1"
+        profile: "gold"
+   a5:
+      driver: "ubiquity"
+      driver_opts:
+        size: "1"
+        profile: "gold"
+   a6:
+      driver: "ubiquity"
+      driver_opts:
+        size: "1"
+        profile: "gold"
+   a7:
+      driver: "ubiquity"
+      driver_opts:
+        size: "1"
+        profile: "gold"
+
+services:
+   a1:
+     image: ubuntu
+     entrypoint: sleep 666
+     volumes:
+        - 'a1:/data'
+   a2:
+     image: ubuntu
+     entrypoint: sleep 666
+     volumes:
+        - 'a2:/data'
+   a3:
+     image: ubuntu
+     entrypoint: sleep 666
+     volumes:
+        - 'a3:/data'
+   a4:
+     image: ubuntu
+     entrypoint: sleep 666
+     volumes:
+        - 'a4:/data'
+   a5:
+     image: ubuntu
+     entrypoint: sleep 666
+     volumes:
+        - 'a5:/data'
+   a6:
+     image: ubuntu
+     entrypoint: sleep 666
+     volumes:
+        - 'a6:/data'
+   a7:
+     image: ubuntu
+     entrypoint: sleep 666
+     volumes:
+          - 'a7:/data'
+
