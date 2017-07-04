@@ -12,7 +12,7 @@ function cleanmpall()
 	for i in `multipath -ll | awk '/dm/{print $1}'`; do cleanmp $i; done
 }
 
-function u-kill()
+function uukill()
 {
 # kill ubiquity process
 	ps -ef| grep ubiquity | grep -v grep |grep -v tail | awk '{print $2}' | xargs kill -9
@@ -58,12 +58,13 @@ U_BIN_DIR="/var/tmp"
 U_LOG_DIR="/tmp"
 
 alias tt='tail -f ${U_LOG_DIR}/ubiquity*.log'
-alias u-ps='ps -ef| grep ubiquity | grep -v tail'
+alias uups='ps -ef| grep ubiquity | grep -v tail'
 alias dvckill='docker rm `docker ps -qa`'
 alias dvl='docker volume ls'
 alias dv='docker volume'
 alias dvp='docker ps -a'
 alias d='docker'
-alias u-run='cd ${U_BIN_DIR}; ${U_BIN_DIR}/ubiquity-docker-plugin &'
-alias u-runser='cd ${U_BIN_DIR}; ${U_BIN_DIR}/ubiquity &'
+alias uurun='cd ${U_BIN_DIR}; ${U_BIN_DIR}/ubiquity-docker-plugin > /var/tmp/ubiquity-docker-plugin-run.log 2>&1 &'
+alias uurunser='cd ${U_BIN_DIR}; ${U_BIN_DIR}/ubiquity > /var/tmp/ubiquity-docker-plugin-run.log 2>&1 &'
+alias mm='multipath -ll'
 
