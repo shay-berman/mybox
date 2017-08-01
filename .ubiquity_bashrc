@@ -68,3 +68,90 @@ alias uurun='cd ${U_BIN_DIR}; ${U_BIN_DIR}/ubiquity-docker-plugin > /var/tmp/ubi
 alias uurunser='cd ${U_BIN_DIR}; ${U_BIN_DIR}/ubiquity > /var/tmp/ubiquity-docker-plugin-run.log 2>&1 &'
 alias mm='multipath -ll'
 
+
+
+
+alias kk=kubectl
+alias kkg="kubectl get"
+alias kkd="kubectl describe"
+function kkls()
+{
+ echo "====== [SC] ========:"; kubectl get storageclass
+ echo "====== [PV] ========:";  kubectl get pv
+ echo "====== [PVC] ========:"; kubectl get pvc
+ echo "====== [POD] ========:"; kubectl get pod
+}
+
+function kkrmpv()
+{
+  kubectl get pvc  | sed '1d'| awk '{print $1}' | xargs kubectl delete pvc
+  kubectl get pv  | sed '1d'| awk '{print $1}' | xargs kubectl delete pv
+}
+alias kkrunpro="/var/tmp/ubiquity/provisioner -provisioner=ubiquity/flex -config=/var/tmp/ubiquity/ubiquity-client.conf -kubeconfig=/root/.kube/config -retries=1 &"
+
+function kkgenerate-yml()
+{
+suffix=$1
+cd 
+cp workspace/ubiquity-k8s/deploy/scbe_volume_pvc-{TEMPLET,$suffix}.yml
+cp workspace/ubiquity-k8s/deploy/scbe_volume_with_pod-{TEMPLET,$suffix}.yml
+sed -i "s/TTTT/$suffix/g" workspace/ubiquity-k8s/deploy/scbe_volume_pvc-$suffix.yml
+sed -i "s/TTTT/$suffix/g" workspace/ubiquity-k8s/deploy/scbe_volume_with_pod-$suffix.yml
+ls -l `pwd`/workspace/ubiquity-k8s/deploy/scbe_volume_pvc-$suffix.yml `pwd`/workspace/ubiquity-k8s/deploy/scbe_volume_with_pod-$suffix.yml
+cd - 2>/dev/null
+}
+
+
+# example : wait_for_item pvc pvc1 Bound 10 1 # wait 10 seconds till timeout
+function wait_for_item()
+{
+  item_type=$1
+  item_name=$2
+  item_wanted_status=$3
+  retries=$4
+  max_retries=$4
+  delay=$5
+  while true; do
+      status=`kubectl get ${item_type} ${item_name} --no-headers -o custom-columns=Status:.status.phase`
+      if [ "$status" = "$item_wanted_status" ]; then
+         echo "${item_type} named [${item_name}] status [$status] as expected (after `expr $max_retries - $retries`/${max_retries} tries)"
+         return
+      else
+         if [ "$retries" -eq 0 ]; then
+             echo "Status of item $item_name was not reached to status ${item_wanted_status}. exit."
+             exit 2
+         else
+            echo "${item_type} named [${item_name}] status [$status] \!= [${item_wanted_status}] wish state. sleeping [$delay] before retry [`expr $max_retries - $retries`/${max_retries}]"
+            retries=`expr $retries - 1`
+            sleep $delay;
+         fi
+      fi
+  done
+}
+
+# wait_for_item_to_delete pvc scbe-accept-voly 10 1
+function wait_for_item_to_delete()
+{
+  item_type=$1
+  item_name=$2
+  retries=$3
+  max_retries=$3
+  delay=$4
+  while true; do
+      kubectl get ${item_type} ${item_name} && rc=$? || rc=$?
+      if [ $rc -ne 0 ]; then
+         echo "${item_type} named [${item_name}] was deleted (after `expr $max_retries - $retries`/${max_retries} tries)"
+         return
+      else
+         if [ "$retries" -eq 0 ]; then
+             echo "${item_type} named [${item_name}] still exist after all ${max_retries} retries. exit."
+             exit 2
+         else
+            echo "${item_type} named [${item_name}] still exist. sleeping [$delay] before retry [`expr $max_retries - $retries`/${max_retries}]"
+            retries=`expr $retries - 1`
+            sleep $delay;
+         fi
+      fi
+  done
+}
+
