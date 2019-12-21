@@ -1,0 +1,90 @@
+
+# git aliases
+alias gb='git branch'
+alias gc='git commit -m '
+alias gco='git checkout'
+alias gd='git diff'
+alias glog='git log --follow'
+alias grshow='git remote show origin'
+alias gs='git status'
+
+# pylint
+alias runpep8='while true; do find . -type f -name "*.py" | xargs pep8 --max-line-length 79; sleep 5; done'
+alias autopep8='autopep8 --in-place --max-line-length 120'
+alias pep8='pep8 --max-line-length 120'
+alias pylint='pylint --rcfile=~/.pylintrc -r n'
+
+# k8s
+alias kk=kubectl
+alias kkg="kubectl get "
+alias kkd="kubectl describe"
+alias kkdel="kubectl delete"
+alias kkc="kubectl create"
+
+# other
+alias df='df -h'
+alias dud='du -hs * | sort -h'
+
+
+
+######======================================
+
+function ginkgoo()
+{
+   go test -v `glide novendor`
+   echo "TEST status = [$?]"
+}
+
+
+function killchrome()
+{
+  ps -ef| grep chrome | awk '{print $2}' | xargs kill -9
+}
+
+
+function p()
+{
+ while :; do ping www.walla.co.il; sleep 2; done
+}
+
+autopep8_agressive_dir () 
+{ 
+    for i in `find $1 -type f -name "*.py"`;
+    do
+        autopep8 --in-place --max-line-length 120 -a $i;
+    done
+}
+autopep8_dir () 
+{ 
+    for i in `find $1 -type f -name "*.py"`;
+    do
+        autopep8 --in-place --max-line-length 120 $i;
+    done
+}
+
+loop () 
+{ 
+    [ -n "$2" ] && sleep_time=$2 || sleep_time=3;
+    while true; do
+        clear;
+        $1;
+        sleep $sleep_time;
+    done
+}
+
+s () { ssh root@$@; }
+
+cleanmp ()
+{
+   # clean up specific multipath device
+   echo "going to clean mp device $1"
+   dmsetup message $1 0 "fail_if_no_path"
+   multipath -f $1
+}
+
+function cleanmpall()
+{
+   # clean all multipath devices
+   for i in `multipath -ll | awk '/dm/{print $1}'`; do cleanmp $i; done
+}
+
