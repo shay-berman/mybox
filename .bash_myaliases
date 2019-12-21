@@ -24,6 +24,8 @@ alias kkc="kubectl create"
 # other
 alias df='df -h'
 alias dud='du -hs * | sort -h'
+alias as='systemctl suspend'
+
 
 
 
