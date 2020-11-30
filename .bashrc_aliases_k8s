@@ -1,0 +1,20 @@
+kgsecd()
+{
+   kubectl get secret $1 -o jsonpath='{.data.*}' | base64 -d
+}
+
+function kgalln()
+{
+kubectl api-resources --verbs=list --namespaced -o name | sed -z 's/\n/,/g' | sed 's/,$//'  | xargs kubectl get -n $1
+}
+
+function kdelnsfinalized()
+{
+# This one is for stucked namespace deletion
+kubectl get namespace $1 -o json \ | tr -d "\n" | sed "s/\"finalizers\": \[[^]]\+\]/\"finalizers\": []/" \ | kubectl replace --raw /api/v1/namespaces/$1/finalize -f -
+}
+alias ccc='journalctl -u shay-check-connection -f | grep ERROR'
+function cc()
+{
+/home/shay/git/mybox/check_connection.sh manual >/dev/null 2>&1 &
+}
